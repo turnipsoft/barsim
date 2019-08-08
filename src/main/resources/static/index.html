@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.0.0/fetch.js">
+  <title>Nine Kick-Off Bar Simulator</title>
+</head>
+<body>
+<div class="container">
+  <div class="center">
+    <h1>Nine Kick-Off Bar Simulator</h1>
+    <div class="row">
+      <h4>Order Drinks</h4>
+    </div>
+    <hr/>
+    <div class="row">
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Gin & Tonic')"><i class="fa fa-glass"></i>&nbsp; Gin & Tonic</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Nine Colada')"><i class="fa fa-glass"></i>&nbsp; Nine Colada</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Beer')"><i class="fa fa-beer" aria-hidden="true"></i>&nbsp;Beer</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Champagne')"><i class="fa fa-glass"></i>&nbsp; Champagne</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Margherita')"><i class="fa fa-glass"></i>&nbsp; Margherita</button>
+      </div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Mojito')"><i class="fa fa-glass"></i>&nbsp; Mojito</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Long Island Ice Tea')"><i class="fa fa-glass"></i>&nbsp; Long Island</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('White Russian')"><i class="fa fa-glass" aria-hidden="true"></i>&nbsp;White Russian</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Whiskey Sour')"><i class="fa fa-glass"></i>&nbsp; Whiskey Sour</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Strawberry Daquiri')"><i class="fa fa-glass"></i>&nbsp; Strawberry Daquiri</button>
+      </div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Melon Daquiri')"><i class="fa fa-glass"></i>&nbsp; Melon Daquiri</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Pina Colada')"><i class="fa fa-glass"></i>&nbsp; Pina Colada</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Rum & Cola')"><i class="fa fa-glass" aria-hidden="true"></i>&nbsp;Rum & Cola</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Bloody Mary')"><i class="fa fa-glass"></i>&nbsp; Bloody Mary</button>
+      </div>
+      <div class="col">
+        <button class="btn" onclick="orderDrink('Wine')"><i class="fa fa-glass"></i>&nbsp; Wine</button>
+      </div>
+
+    </div>
+    <div class="row">&nbsp;&nbsp; </div>
+    <div class="row">&nbsp;
+      <div class="col">
+        <button class="btn" onclick="closeBar()"><i class="fa fa-close"></i>&nbsp; Close Bar</button>
+      </div>
+    </div>
+    <hr/>
+    <div class="row">
+      <h4>Drinks pending</h4>
+    </div>
+    <div class="row">
+      <h4><span id="drinksInQueue"></span></h4>
+    </div>
+    <div class="row">
+      <h4>Drinks Mixing</h4>
+    </div>
+    <div class="row">
+      <div id="drinksMixing">&nbsp;</div>
+    </div>
+    <div class="row">
+      <h4>Drinks Served</h4>
+    </div>
+    <div class="row">
+      <div id="drinksServed">&nbsp;</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function orderDrink(drinkName) {
+      const url = "/barapi/order/"+drinkName;
+      fetch(url)
+          .then((resp) => resp.json()) // Transform the data into json
+          .then(function(data) {
+              updateUI(data);
+           });
+  }
+
+  function updateUI(data) {
+      var elem = document.getElementById('drinksInQueue');
+      elem.innerText = data.drinksInQueue;
+      createServedList(data.completedOrders);
+      createMixingList(data.pendingOrders);
+  }
+
+  function createNode(element) {
+      return document.createElement(element); // Create the type of element you pass in the parameters
+  }
+
+  function append(parent, el) {
+      return parent.appendChild(el); // Append the second parameter(element) to the first one
+  }
+
+  function createServedList(data) {
+      let ul = createNode("ul");
+      ul.style.display="flex";
+      ul.style.flexWrap="wrap";
+
+      data.forEach(function(d) {
+        let li = createNode("li");
+        let span = createNode("span");
+        li.style.margin="2px 2px";
+        li.style.color="#0AA";
+        li.style.padding="5px 20px";
+        li.fontsize="8px";
+        li.innerText = d.drinkName + ' for ' +d.drinkFor;
+        append(li, span);
+        append(ul, li);
+
+      });
+
+      let elem = document.getElementById('drinksServed');
+      elem.innerHTML = '';
+      append(elem, ul);
+  }
+
+  function createMixingList(data) {
+      let ul = createNode("ul");
+      ul.style.display="flex";
+      ul.style.flexWrap="wrap";
+
+      data.forEach(function(d) {
+          if (d.bartender=='pending') {
+              return;
+          }
+          let li = createNode("li");
+          let span = createNode("span");
+          li.style.margin="2px 2px";
+          li.style.color="#0A0";
+          li.style.padding="5px 20px";
+          li.fontsize="8px";
+          li.innerText = d.bartender + ' is making a '+d.drinkName;
+          append(li, span);
+          append(ul, li);
+
+      });
+
+      let elem = document.getElementById('drinksMixing');
+      elem.innerHTML = '';
+      append(elem, ul);
+  }
+
+  let timerId = setInterval(() => update(), 1000);
+
+  function update() {
+      const url = "/barapi/update";
+      fetch(url)
+          .then((resp) => resp.json()) // Transform the data into json
+          .then(function(data) {
+              updateUI(data);
+          });
+  }
+
+  function closeBar() {
+      const url = "/barapi/closeBar";
+      fetch(url)
+          .then((resp) => resp.json()) // Transform the data into json
+          .then(function(data) {
+              updateUI(data);
+          });
+  }
+</script>
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
