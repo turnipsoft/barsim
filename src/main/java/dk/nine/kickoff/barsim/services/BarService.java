@@ -13,16 +13,20 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class BarService {
 
   ThreadPoolExecutor executor;
-  BartenderPoolService bartenderPoolService;
+  BartenderPoolService bartenderPool;
   int maximumPrepTime;
 
   Set<Order> pendingOrders;
   List<Order> completedOrders;
   Employees employees;
+  private MetricCounterService metricCounterService;
 
-  public BarService(@Value("${maximumPrepTime}") int maximumPrepTime, BartenderPoolService bartenderPoolService) {
+  public BarService(@Value("${maximumPrepTime}") int maximumPrepTime,
+                    BartenderPoolService bartenderPool,
+                    MetricCounterService metricCounterService) {
     this.maximumPrepTime = maximumPrepTime;
-    this.bartenderPoolService = bartenderPoolService;
+    this.bartenderPool = bartenderPool;
+    this.metricCounterService = metricCounterService;
     this.pendingOrders = new HashSet<>();
     this.completedOrders = new ArrayList<>();
     this.employees = new Employees();
@@ -32,21 +36,28 @@ public class BarService {
   public void orderDrink(String drinkName) {
     int preptime = new Random().nextInt(maximumPrepTime);
     Order order = new Order(drinkName, employees.getRandomEmployee(),preptime);
+    this.metricCounterService.incrementOrder(order);
     pendingOrders.add(order);
 
     executor.submit( ()-> {
       try {
-        String bartender = bartenderPoolService.getBartender();
+        String bartender = bartenderPool.getBartender();
         order.setBartender(bartender);
+        metricCounterService.incrementBartender();
         System.out.println(String.format("%s is making a %s gonna take %d ms", bartender, drinkName,preptime));
         Thread.sleep(preptime);
-        bartenderPoolService.releaseBartender(bartender);
+        bartenderPool.releaseBartender(bartender);
+        metricCounterService.decrementBartender();
+        metricCounterService.updateDrinksInQueue(executor.getQueue().size());
         pendingOrders.remove(order);
         completedOrders.add(order);
+        this.metricCounterService.incrementOrderServed(order);
       } catch (InterruptedException ie) {
         System.out.println("Interrupted making the drink "+drinkName);
       }
     });
+
+    metricCounterService.updateDrinksInQueue(executor.getQueue().size());
   }
 
   public int getQueueSize() {
