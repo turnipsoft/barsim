@@ -1,6 +1,5 @@
 package dk.nine.kickoff.barsim.services;
 
-import dk.nine.kickoff.barsim.model.BartenderPool;
 import dk.nine.kickoff.barsim.model.Employees;
 import dk.nine.kickoff.barsim.model.Order;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,16 +13,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class BarService {
 
   ThreadPoolExecutor executor;
-  BartenderPool bartenderPool;
+  BartenderPoolService bartenderPoolService;
   int maximumPrepTime;
 
   Set<Order> pendingOrders;
   List<Order> completedOrders;
   Employees employees;
 
-  public BarService(@Value("${maximumPrepTime}") int maximumPrepTime, BartenderPool bartenderPool) {
+  public BarService(@Value("${maximumPrepTime}") int maximumPrepTime, BartenderPoolService bartenderPoolService) {
     this.maximumPrepTime = maximumPrepTime;
-    this.bartenderPool = bartenderPool;
+    this.bartenderPoolService = bartenderPoolService;
     this.pendingOrders = new HashSet<>();
     this.completedOrders = new ArrayList<>();
     this.employees = new Employees();
@@ -37,11 +36,11 @@ public class BarService {
 
     executor.submit( ()-> {
       try {
-        String bartender = bartenderPool.getBartender();
+        String bartender = bartenderPoolService.getBartender();
         order.setBartender(bartender);
         System.out.println(String.format("%s is making a %s gonna take %d ms", bartender, drinkName,preptime));
         Thread.sleep(preptime);
-        bartenderPool.releaseBartender(bartender);
+        bartenderPoolService.releaseBartender(bartender);
         pendingOrders.remove(order);
         completedOrders.add(order);
       } catch (InterruptedException ie) {

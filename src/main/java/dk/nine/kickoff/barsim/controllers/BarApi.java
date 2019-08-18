@@ -1,7 +1,8 @@
-package dk.nine.kickoff.barsim.services;
+package dk.nine.kickoff.barsim.controllers;
 
 import dk.nine.kickoff.barsim.model.DrinkMenu;
 import dk.nine.kickoff.barsim.model.OrderResponse;
+import dk.nine.kickoff.barsim.services.BarService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
