@@ -12,13 +12,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Service
 public class BarService {
 
-  ThreadPoolExecutor executor;
-  BartenderPoolService bartenderPoolService;
-  int maximumPrepTime;
+  private ThreadPoolExecutor executor;
+  private BartenderPoolService bartenderPoolService;
+  private int maximumPrepTime;
 
-  Set<Order> pendingOrders;
-  List<Order> completedOrders;
-  Employees employees;
+  private Set<Order> pendingOrders;
+  private List<Order> completedOrders;
+  private Employees employees;
 
   public BarService(@Value("${maximumPrepTime}") int maximumPrepTime, BartenderPoolService bartenderPoolService) {
     this.maximumPrepTime = maximumPrepTime;
@@ -31,41 +31,38 @@ public class BarService {
 
   public void orderDrink(String drinkName) {
     int preptime = new Random().nextInt(maximumPrepTime);
-    Order order = new Order(drinkName, employees.getRandomEmployee(),preptime);
+    Order order = new Order(drinkName, employees.getRandomEmployee(), preptime);
     pendingOrders.add(order);
 
     executor.submit( ()-> {
       try {
         String bartender = bartenderPoolService.getBartender();
         order.setBartender(bartender);
-        System.out.println(String.format("%s is making a %s gonna take %d ms", bartender, drinkName,preptime));
+        System.out.println(String.format("%s is making a %s gonna take %d ms", bartender, drinkName, preptime));
         Thread.sleep(preptime);
         bartenderPoolService.releaseBartender(bartender);
         pendingOrders.remove(order);
         completedOrders.add(order);
       } catch (InterruptedException ie) {
-        System.out.println("Interrupted making the drink "+drinkName);
+        System.out.println("Interrupted making the drink " + drinkName);
       }
     });
   }
 
   public int getQueueSize() {
-    return this.executor.getQueue().size();
+    return executor.getQueue().size();
   }
 
   public Set<Order> getPendingOrders() {
-    return this.pendingOrders;
+    return pendingOrders;
   }
 
   public List<Order> getCompletedOrders() {
-    return this.completedOrders;
+    return completedOrders;
   }
 
   public void clear() {
-    this.completedOrders.clear();
+    completedOrders.clear();
   }
 
-  public String getRandomEmployee() {
-    return this.employees.getRandomEmployee();
-  }
 }
