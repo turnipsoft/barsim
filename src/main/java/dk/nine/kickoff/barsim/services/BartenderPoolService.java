@@ -1,11 +1,11 @@
-package dk.nine.kickoff.barsim.model;
+package dk.nine.kickoff.barsim.services;
 
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-public class BartenderPool {
+public class BartenderPoolService {
 
   static final String RODRIGUEZ = "Rodriguez";
   static final String LORENA = "Lorena";
@@ -16,7 +16,7 @@ public class BartenderPool {
   List<String> bartenders;
   Set<String> working;
 
-  public BartenderPool() {
+  public BartenderPoolService() {
     bartenders = new ArrayList<>(5);
     bartenders.add(RODRIGUEZ);
     bartenders.add(LORENA);
