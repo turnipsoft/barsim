@@ -7,14 +7,14 @@ import java.util.*;
 @Service
 public class BartenderPoolService {
 
-  static final String RODRIGUEZ = "Rodriguez";
-  static final String LORENA = "Lorena";
-  static final String LUIS = "Luis";
-  static final String MARLA = "Marla";
-  static final String DANIELA = "Daniela";
+  private static final String RODRIGUEZ = "Rodriguez";
+  private static final String LORENA = "Lorena";
+  private static final String LUIS = "Luis";
+  private static final String MARLA = "Marla";
+  private static final String DANIELA = "Daniela";
 
-  List<String> bartenders;
-  Set<String> working;
+  private List<String> bartenders;
+  private Set<String> working;
 
   public BartenderPoolService() {
     bartenders = new ArrayList<>(5);
@@ -27,10 +27,10 @@ public class BartenderPoolService {
   }
 
   public String getBartender() {
-    String bartender = bartenders.get(new Random().nextInt(4));
-    while (working.contains(bartender)) {
-      bartender = bartenders.get(new Random().nextInt(4));
-    }
+    String bartender;
+    do {
+      bartender = bartenders.get(new Random().nextInt(bartenders.size() - 1));
+    } while (working.contains(bartender));
 
     working.add(bartender);
     return bartender;
@@ -41,7 +41,7 @@ public class BartenderPoolService {
   }
 
   public Set<String> getWorkingBartenders() {
-    return this.working;
+    return working;
   }
 
 }
