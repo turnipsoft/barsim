@@ -12,20 +12,20 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Service
 public class BarService {
 
-  ThreadPoolExecutor executor;
-  BartenderPoolService bartenderPool;
-  int maximumPrepTime;
+  private ThreadPoolExecutor executor;
+  private BartenderPoolService bartenderPoolService;
+  private int maximumPrepTime;
 
-  Set<Order> pendingOrders;
-  List<Order> completedOrders;
-  Employees employees;
+  private Set<Order> pendingOrders;
+  private List<Order> completedOrders;
+  private Employees employees;
   private MetricCounterService metricCounterService;
 
   public BarService(@Value("${maximumPrepTime}") int maximumPrepTime,
-                    BartenderPoolService bartenderPool,
+                    BartenderPoolService bartenderPoolService,
                     MetricCounterService metricCounterService) {
     this.maximumPrepTime = maximumPrepTime;
-    this.bartenderPool = bartenderPool;
+    this.bartenderPoolService = bartenderPoolService;
     this.metricCounterService = metricCounterService;
     this.pendingOrders = new HashSet<>();
     this.completedOrders = new ArrayList<>();
@@ -35,25 +35,25 @@ public class BarService {
 
   public void orderDrink(String drinkName) {
     int preptime = new Random().nextInt(maximumPrepTime);
-    Order order = new Order(drinkName, employees.getRandomEmployee(),preptime);
-    this.metricCounterService.incrementOrder(order);
+    Order order = new Order(drinkName, employees.getRandomEmployee(), preptime);
+    metricCounterService.incrementOrder(order);
     pendingOrders.add(order);
 
     executor.submit( ()-> {
       try {
-        String bartender = bartenderPool.getBartender();
+        String bartender = bartenderPoolService.getBartender();
         order.setBartender(bartender);
         metricCounterService.incrementBartender();
-        System.out.println(String.format("%s is making a %s gonna take %d ms", bartender, drinkName,preptime));
+        System.out.println(String.format("%s is making a %s gonna take %d ms", bartender, drinkName, preptime));
         Thread.sleep(preptime);
-        bartenderPool.releaseBartender(bartender);
+        bartenderPoolService.releaseBartender(bartender);
         metricCounterService.decrementBartender();
         metricCounterService.updateDrinksInQueue(executor.getQueue().size());
         pendingOrders.remove(order);
         completedOrders.add(order);
-        this.metricCounterService.incrementOrderServed(order);
+        metricCounterService.incrementOrderServed(order);
       } catch (InterruptedException ie) {
-        System.out.println("Interrupted making the drink "+drinkName);
+        System.out.println("Interrupted making the drink " + drinkName);
       }
     });
 
@@ -61,22 +61,19 @@ public class BarService {
   }
 
   public int getQueueSize() {
-    return this.executor.getQueue().size();
+    return executor.getQueue().size();
   }
 
   public Set<Order> getPendingOrders() {
-    return this.pendingOrders;
+    return pendingOrders;
   }
 
   public List<Order> getCompletedOrders() {
-    return this.completedOrders;
+    return completedOrders;
   }
 
   public void clear() {
-    this.completedOrders.clear();
+    completedOrders.clear();
   }
 
-  public String getRandomEmployee() {
-    return this.employees.getRandomEmployee();
-  }
 }
