@@ -18,14 +18,14 @@ public class MetricCounterServiceImpl implements MetricCounterService {
   private static final String ACTIVE_BARTENDER_GAUGE_NAME = "nine.barsim.bartender.active";
   private static final String DRINK_QUEUE_SIZE_GAUGE_NAME = "nine.barsim.drinksqueue.size";
 
-  private static final String DRINK_NAME="drinkname";
-  private static final String BARTENDER="bartender";
-  private static final String NINER="niner";
+  private static final String DRINK_NAME = "drinkname";
+  private static final String BARTENDER = "bartender";
+  private static final String NINER = "niner";
 
   private final MeterRegistry meterRegistry;
   private Map<String, Counter> counters = new HashMap<>();
-  AtomicInteger activeBartendersAmount;
-  AtomicInteger drinksInQueue;
+  private AtomicInteger activeBartendersAmount;
+  private AtomicInteger drinksInQueue;
 
   public MetricCounterServiceImpl(MeterRegistry meterRegistry) {
     this.meterRegistry = meterRegistry;
@@ -35,59 +35,51 @@ public class MetricCounterServiceImpl implements MetricCounterService {
 
   private String getDrinkCounterId(Order order, String base) {
     String counterName = String.format("%s.%s", base, order.getDrinkName());
-    if (order.getBartender()!=null) {
-      counterName = String.format("%s.%s",counterName, order.getBartender());
+    
+    if (order.getBartender() != null) {
+      counterName = String.format("%s.%s", counterName, order.getBartender());
     } else {
-      counterName = String.format("%s.%s",counterName, order.getDrinkFor());
+      counterName = String.format("%s.%s", counterName, order.getDrinkFor());
     }
 
-    return counterName.replaceAll(" ","");
+    return counterName.replaceAll(" ", "");
   }
 
   @Override
   public void incrementOrder(Order order) {
     String counterId = String.format("%s.%s.%s", ORDER_DRINK_COUNTER_NAME, order.getDrinkName(), order.getDrinkFor());
 
-    Counter counter = counters.get(counterId);
-    if (counter==null) {
-      counter = meterRegistry.counter(ORDER_DRINK_COUNTER_NAME,
+    Counter counter = counters.computeIfAbsent(counterId, key -> meterRegistry.counter(ORDER_DRINK_COUNTER_NAME,
         DRINK_NAME, order.getDrinkName(),
-        NINER, order.getDrinkFor());
-      counters.put(counterId, counter);
-    }
-
+        NINER, order.getDrinkFor()));
+    
     counter.increment();
   }
 
   @Override
   public void incrementBartender() {
-    this.activeBartendersAmount.set(this.activeBartendersAmount.intValue()+1);
+    activeBartendersAmount.incrementAndGet();
   }
 
   @Override
   public void decrementBartender() {
-    this.activeBartendersAmount.set(this.activeBartendersAmount.intValue()-1);
+    activeBartendersAmount.decrementAndGet();
   }
 
   @Override
   public void updateDrinksInQueue(int queuesize) {
-    this.drinksInQueue.set(queuesize);
-
+    drinksInQueue.set(queuesize);
   }
 
   @Override
   public void incrementOrderServed(Order order) {
     String counterId = String.format("%s.%s.%s", SERVED_DRINK_COUNTER_NAME, order.getDrinkName(), order.getBartender());
 
-    Counter counter = counters.get(counterId);
-    if (counter==null) {
-      counter = meterRegistry.counter(SERVED_DRINK_COUNTER_NAME,
+    Counter counter = counters.computeIfAbsent(counterId, key -> meterRegistry.counter(SERVED_DRINK_COUNTER_NAME,
         DRINK_NAME, order.getDrinkName(),
-        BARTENDER, order.getBartender()
-      );
-      counters.put(counterId, counter);
-    }
+        BARTENDER, order.getBartender()));
 
     counter.increment();
   }
+
 }
