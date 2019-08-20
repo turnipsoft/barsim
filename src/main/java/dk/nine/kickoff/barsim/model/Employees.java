@@ -126,6 +126,6 @@ public class Employees {
   }
 
   public String getRandomEmployee() {
-    return employeeNames.get(new Random().nextInt(employeeNames.size() - 1));
+    return employeeNames.get(new Random().nextInt(employeeNames.size()));
   }
 }

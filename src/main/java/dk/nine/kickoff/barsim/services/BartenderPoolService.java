@@ -29,7 +29,7 @@ public class BartenderPoolService {
   public String getBartender() {
     String bartender;
     do {
-      bartender = bartenders.get(new Random().nextInt(bartenders.size() - 1));
+      bartender = bartenders.get(new Random().nextInt(bartenders.size()));
     } while (working.contains(bartender));
 
     working.add(bartender);
