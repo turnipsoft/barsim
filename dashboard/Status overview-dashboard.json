@@ -17,6 +17,12 @@
       "version": ""
     },
     {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
@@ -151,12 +157,60 @@
       }
     },
     {
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 19,
+        "y": 0
+      },
+      "id": 16,
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "last"
+          ],
+          "defaults": {
+            "mappings": [],
+            "max": 5,
+            "min": 0,
+            "thresholds": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "override": {},
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.3.2",
+      "targets": [
+        {
+          "expr": "nine_barsim_bartender_active",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Active bartenders",
+      "type": "gauge"
+    },
+    {
       "description": "",
       "gridPos": {
         "h": 13,
         "w": 5,
         "x": 19,
-        "y": 0
+        "y": 3
       },
       "id": 9,
       "options": {
@@ -836,5 +890,5 @@
   "timezone": "",
   "title": "Status overview",
   "uid": "uasw0ldWk",
-  "version": 8
+  "version": 9
 }
