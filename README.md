@@ -43,6 +43,9 @@ docker restart prometheus
 
 
 Tilføj Pie-chart plugin til Grafana:
+
 docker exec –it grafana /bin/bash
+
 grafana-cli plugins install grafana-piechart-panel
+
 docker restart grafana
